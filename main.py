@@ -143,20 +143,19 @@ class Player(pygame.sprite.Sprite):
 		self.rect.x += self.xDelta
 		self.rect.y += self.yDelta
 
-		bounce = random.randrange(-2,2)
 		if self.rect.centerx < 0:
 			self.rect.centerx = 0
-			self.xDelta *= bounce
+			self.xDelta *= -0.5
 		elif self.rect.centerx > screenWidth:
 			self.rect.centerx = screenWidth
-			self.xDelta *= bounce
+			self.xDelta *= -0.5
 
 		if self.rect.centery < 0:
 			self.rect.centery = 0
-			self.yDelta *= bounce
+			self.yDelta *= -0.5
 		elif self.rect.centery > screenHeight:
 			self.rect.centery = screenHeight
-			self.yDelta *= bounce
+			self.yDelta *= -0.5
 
 
 		if self.rect.centerx > screenWidth/2+100 or self.rect.centerx < screenWidth/2-100:
@@ -269,3 +268,4 @@ while True:
 
 #CLOCK MUST BE LAST###############################
 	clock.tick(60)
+
