@@ -38,13 +38,74 @@ def quitGame():
 	pygame.quit()
 	sys.exit()
 
-class ForeignObject(pygame.sprite.Sprite):
-	def __init__(self,number):
+
+class Earth(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load("Earth.png").convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.centerx = screenWidth/2
+		self.rect.centery = screenHeight/2
+		self.radius = 24
+		self.xDelta = 0
+		self.yDelta = 0
+
+	def update(self):
+		self.rect.x += self.xDelta
+		self.rect.y += self.yDelta
+
+		if self.rect.centerx < 0:
+			self.rect.centerx = 0
+			self.xDelta *= -1
+		elif self.rect.centerx > screenWidth:
+			self.rect.centerx = screenWidth
+			self.xDelta *= -1
+
+		if self.rect.centery < 0:
+			self.rect.centery = 0
+			self.yDelta *= -1
+		elif self.rect.centery > screenHeight:
+			self.rect.centery = screenHeight
+			self.yDelta *= -1
+
+
+class Wormhole(pygame.sprite.Sprite):
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load("blackHole3.png").convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.centerx = random.randint(0,screenWidth)
+		self.rect.centery = random.randint(0,screenHeight)
+		self.radius = 16
+		self.xDelta = 0
+		self.yDelta = 0
+
+	def update(self):
+		self.rect.x += self.xDelta
+		self.rect.y += self.yDelta
+
+		if self.rect.centerx < 0:
+			self.rect.centerx = 0
+			self.xDelta *= -1
+		elif self.rect.centerx > screenWidth:
+			self.rect.centerx = screenWidth
+			self.xDelta *= -1
+
+		if self.rect.centery < 0:
+			self.rect.centery = 0
+			self.yDelta *= -1
+		elif self.rect.centery > screenHeight:
+			self.rect.centery = screenHeight
+			self.yDelta *= -1
+
+
+class Asteroid(pygame.sprite.Sprite):
+	def __init__(self):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load("Asteroid.png").convert_alpha()
 		self.rect = self.image.get_rect()
-		self.rect.centerx = 100
-		self.rect.centery = 100
+		self.rect.centerx = random.randint(0,screenWidth)
+		self.rect.centery = random.randint(0,screenHeight)
 		self.xDelta = 0
 		self.yDelta = 0
 		self.radius=70
@@ -52,18 +113,20 @@ class ForeignObject(pygame.sprite.Sprite):
 
 	def update(self):
 		g = 30
-		xDist = self.rect.centerx - screenWidth/2
-		yDist = self.rect.centery - screenHeight/2
-		dist = math.sqrt(xDist**2+yDist**2)
+		for earth in earths:
+			xDist = self.rect.centerx - earth.rect.centerx
+			yDist = self.rect.centery - earth.rect.centery
+			dist = math.sqrt(xDist**2+yDist**2)
 
-		angle = math.atan2(yDist, xDist)
-		self.xDelta -= math.cos(angle) * g/dist
-		self.yDelta -= math.sin(angle) * g/dist
+			angle = math.atan2(yDist, xDist)
+			self.xDelta -= math.cos(angle) * g/dist
+			self.yDelta -= math.sin(angle) * g/dist
 
 	
 		self.rect.x += self.xDelta
 		self.rect.y += self.yDelta
 
+"""
 		if self.rect.centerx < 0:
 			self.rect.centerx = 0
 			self.xDelta *= -0.5
@@ -77,6 +140,7 @@ class ForeignObject(pygame.sprite.Sprite):
 		elif self.rect.centery > screenHeight:
 			self.rect.centery = screenHeight
 			self.yDelta *= -0.5
+"""
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self,playerNumber):
@@ -137,13 +201,14 @@ class Player(pygame.sprite.Sprite):
 
 	def update(self):
 		g = 40
-		xDist = self.rect.centerx - screenWidth/2
-		yDist = self.rect.centery - screenHeight/2
-		dist = math.sqrt(xDist**2+yDist**2)
+		for earth in earths:
+			xDist = self.rect.centerx - earth.rect.centerx
+			yDist = self.rect.centery - earth.rect.centery
+			dist = math.sqrt(xDist**2+yDist**2)
 
-		angle = math.atan2(yDist, xDist)
-		self.xDelta -= math.cos(angle) * g/dist
-		self.yDelta -= math.sin(angle) * g/dist
+			angle = math.atan2(yDist, xDist)
+			self.xDelta -= math.cos(angle) * g/dist
+			self.yDelta -= math.sin(angle) * g/dist
 
 	
 		self.rect.x += self.xDelta
@@ -164,13 +229,6 @@ class Player(pygame.sprite.Sprite):
 			self.yDelta *= -0.5
 
 
-		if self.rect.centerx > screenWidth/2+100 or self.rect.centerx < screenWidth/2-100:
-			if self in behindEarth:
-				behindEarth.remove(self)
-				infrontOfEarth.add(self)
-			else:
-				infrontOfEarth.remove(self)
-				behindEarth.add(self)
 
 #startup stuff###################################
 pygame.init()
@@ -180,15 +238,18 @@ screen = pygame.display.set_mode((screenWidth,screenHeight),flags=pygame.NOFRAME
 clock = pygame.time.Clock()
 frameCount = 0
 players = pygame.sprite.Group()
-behindEarth = pygame.sprite.Group()
-infrontOfEarth = pygame.sprite.Group()
+
+earths = pygame.sprite.Group()
+earth = Earth()
+earths.add(earth)
+
+wormholes = pygame.sprite.Group()
+
 player1 = Player(1)
 player2 = Player(2)
 players.add(player1,player2)
 
-foreignObjects = pygame.sprite.Group()
-asteroid = ForeignObject(1)
-foreignObjects.add(asteroid)
+asteroids = pygame.sprite.Group()
 
 background = pygame.Surface((screenWidth,screenHeight))
 backgroundRect = background.get_rect()
@@ -235,8 +296,10 @@ while True:
 			quitGame()
 
 	#update stuff
+	earths.update()
 	players.update()
-	foreignObjects.update()
+	asteroids.update()
+
 	#Collision management
 	if pygame.sprite.collide_circle(player1,player2):
 		xDP1=player2.xDelta
@@ -249,24 +312,26 @@ while True:
 		player1.yDelta=yDP1
 		player2.yDelta=yDP2
 		
-	if pygame.sprite.collide_circle(player1,asteroid):
-		xFA=asteroid.xDelta*asteroid.mass
-		yFA=asteroid.yDelta*asteroid.mass
-		xFP1=player1.xDelta*player1.mass
-		yFP1=player1.yDelta*player1.mass
+	for asteroid in asteroids:
+		if pygame.sprite.collide_circle(earth,asteroid):
+			quitGame()	
 
-		xDP1=(xFP1-xFA)/player1.mass
-		xDA=(xFA-xFP1)/asteroid.mass
-		yDP1=(yFP1-yFA)/player1.mass
-		yDA=(yFA-yFP1)/asteroid.mass
+		for player in players:
+			if pygame.sprite.collide_circle(player,asteroid):
+				xDA=player.xDelta
+				xDP=asteroid.xDelta
+				yDA=player.yDelta
+				yDP=asteroid.yDelta
 
-		player1.xDelta=xDP1
-		asteroid.xDelta=xDA
-		player1.yDelta=yDP1
-		asteroid.yDelta=yDA
-		
+				asteroid.xDelta=xDA
+				player.xDelta=xDP
+				asteroid.yDelta=yDA
+				player.yDelta=yDP
 
-
+	for wormhole in wormholes:
+		for asteroid in asteroids:
+			if pygame.sprite.collide_circle(asteroid,wormhole):
+				asteroid.kill()
 
 
 
@@ -275,27 +340,19 @@ while True:
 	screen.blit(background,(0,0))
 	
 	if (frameCount % 600 == 0):
-		blackHolePos = (random.randint(0,screenWidth*1),random.randint(0,screenHeight))
-	if (frameCount % 600 < 100):
-		screen.blit(blackHole0,(blackHolePos))
-	elif (frameCount % 600 < 100):
-		screen.blit(blackHole3,(blackHolePos))
-	elif (frameCount % 600 < 200):
-		screen.blit(blackHole2,(blackHolePos))
-	elif (frameCount % 600 < 300):
-		screen.blit(blackHole3,(blackHolePos))
-	elif (frameCount % 600 < 400):
-		screen.blit(blackHole2,(blackHolePos))
-	elif (frameCount % 600 < 500):
-		screen.blit(blackHole3,(blackHolePos))
-	elif (frameCount % 600 < 600):
-		screen.blit(blackHole3,(blackHolePos))
-		
-	#players.draw(screen)
-	foreignObjects.draw(screen)
-	behindEarth.draw(screen)
-	screen.blit(earth,(screenWidth/2-36,screenHeight/2-36))
-	infrontOfEarth.draw(screen)
+		asteroid = Asteroid()
+		asteroids.add(asteroid)
+
+		wormholes.empty()
+		wormhole = Wormhole()
+		wormholes.add(wormhole)
+
+	asteroids.draw(screen)
+	#screen.blit(earth,(screenWidth/2-36,screenHeight/2-36))
+	earths.draw(screen)
+	wormholes.draw(screen)
+	players.draw(screen)
+
 
 	player1.image = player1.images[0]
 	player2.image = player2.images[0]
