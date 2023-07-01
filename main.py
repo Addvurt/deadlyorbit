@@ -231,6 +231,8 @@ while True:
 	#update stuff
 	players.update()
 	foreignObjects.update()
+	print(pygame.sprite.collide_rect(player1,player2))
+
 
 
 	#draw stuff
