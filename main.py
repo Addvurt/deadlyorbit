@@ -1,3 +1,5 @@
+# vim: set noexpandtab:
+
 import sys
 import random
 import pygame
@@ -45,6 +47,8 @@ class ForeignObject(pygame.sprite.Sprite):
 		self.rect.centery = 100
 		self.xDelta = 0
 		self.yDelta = 0
+		self.radius=70
+		self.mass=10
 
 	def update(self):
 		g = 30
@@ -95,6 +99,8 @@ class Player(pygame.sprite.Sprite):
 		self.xDelta = 0
 		self.accForce = 1.5
 		self.thrust = "None"
+		self.radius = 30
+		self.mass = 3
 	
 	def accelerateRight(self):
 		self.xDelta += self.accForce
@@ -231,10 +237,40 @@ while True:
 	#update stuff
 	players.update()
 	foreignObjects.update()
-	print(pygame.sprite.collide_rect(player1,player2))
+	#Collision management
+	if pygame.sprite.collide_circle(player1,player2):
+		xDP1=player2.xDelta
+		xDP2=player1.xDelta
+		yDP1=player2.yDelta
+		yDP2=player1.yDelta
+
+		player1.xDelta=xDP1
+		player2.xDelta=xDP2
+		player1.yDelta=yDP1
+		player2.yDelta=yDP2
+		
+	if pygame.sprite.collide_circle(player1,asteroid):
+		xFA=asteroid.xDelta*asteroid.mass
+		yFA=asteroid.yDelta*asteroid.mass
+		xFP1=player1.xDelta*player1.mass
+		yFP1=player1.yDelta*player1.mass
+
+		xDP1=(xFP1-xFA)/player1.mass
+		xDA=(xFA-xFP1)/asteroid.mass
+		yDP1=(yFP1-yFA)/player1.mass
+		yDA=(yFA-yFP1)/asteroid.mass
+
+		player1.xDelta=xDP1
+		asteroid.xDelta=xDA
+		player1.yDelta=yDP1
+		asteroid.yDelta=yDA
+		
 
 
 
+
+
+		
 	#draw stuff
 	screen.blit(background,(0,0))
 	
@@ -268,6 +304,6 @@ while True:
 	#update frame counter
 	frameCount += 1
 
-#CLOCK MUST BE LAST###############################
+#CLOCK MUST BE LAST##############################
 	clock.tick(60)
 
